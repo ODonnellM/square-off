@@ -1,0 +1,38 @@
+if [ ${#} -eq 0 ]; then
+    echo "Usage: square-off <image> [-d output directory|-c color]"
+    exit 1
+fi
+
+OPTIND=1
+
+img="${1}"
+shift
+
+out="square_out"
+color="transparent"
+
+while getopts ":d:c:" opt; do
+    case "${opt}" in
+	d) out="${OPTARG}";;
+	c) color="${OPTARG}";;
+    esac
+done
+
+if ! [ -d "${out}" ]; then
+    echo "=====> Creating output ${out}"
+    mkdir -p "${out}"
+else
+    echo "=====> Using output ${out}"
+fi
+
+w=$(identify -format "%w" "${img}")
+h=$(identify -format "%h" "${img}")
+
+if [ $w -gt $h ]; then
+   h=$w
+else
+   w=$h
+fi
+
+convert -size "${w}"x"${h}" canvas:"${color}" "${out}"/"${img}"
+convert -composite -gravity center "${out}"/"${img}" "${img}" "${out}"/"${img}"
